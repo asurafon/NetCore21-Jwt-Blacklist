@@ -1,16 +1,9 @@
-# fichas-programaticas
+# .Net Core 2.1 - JWT with Blacklist
 
-## Project setup
-```
-npm install
-```
+## What's about?
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+This project is a example from how to develop jwt authentication in .net core 2.1. It also will have a blacklist for that users who has a valid token but they are not allowed in the API.
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Project inspiration/sources
+
+https://auth0.com/blog/securing-asp-dot-net-core-2-applications-with-jwts/
