@@ -52,6 +52,10 @@ namespace JWTv._1._1
             });
             
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            
+            //Adding the IConfiguration instance to the service collection as a singleton object in ConfigureServices
+            //This allows you to inject IConfiguration in any controller or service
+            services.AddSingleton(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,13 +69,12 @@ namespace JWTv._1._1
             {
                 app.UseHsts();
             }
-            app.UseAuthentication();
 
+            //Configuring the pipeline            
+            app.UseCors("CorsPolicy");
             //usa el servicio de autenticacion
             app.UseMiddleware<TokenMiddleware>();
-
-            
-            app.UseCors("CorsPolicy");
+            app.UseAuthentication();            
             app.UseHttpsRedirection();
             app.UseMvc();
         }

@@ -43,14 +43,16 @@ namespace JWTv._1._1.Controllers
 
         private string BuildToken(UserModel user)
         {
-
+            var expirar = DateTime.Now.AddMinutes(1);
             //adding claims
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.NameId, user.NameId),
-                new Claim("rol", user.rol)
+                new Claim("rol", user.rol),
+                new Claim("usuario", "asura"),
+                new Claim("expira", expirar.ToString("yyyy-MM-ddTHH:mm: ss.fff"))
             };
-            var expirar = DateTime.Now.AddMinutes(1);
+            
             Debug.WriteLine("XXXXXXXXXXXXXXXXXXXXXXXXX");
             Debug.WriteLine(expirar);
             //Console.WriteLine(expirar);

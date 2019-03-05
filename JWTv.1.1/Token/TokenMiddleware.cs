@@ -1,11 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace JWTv.Token
@@ -20,38 +24,42 @@ namespace JWTv.Token
             _next = next;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context, IConfiguration configuration)
         {
             try
             {
                 Debug.WriteLine("ingreso acá");
-                //IEnumerable<string> encabezado = new List<string>();
-                //StringValues encabezado = default(StringValues);
-                //context.Request.Headers.TryGetValue("Authorization", out encabezado);
-                //string salida = encabezado.ToString();
-                //string token = salida.Split(" ")[1];
 
-                //var algo = context.User.Identity as ClaimsIdentity;
-                //if (algo.Claims != null)
-                //{
-                //    IEnumerable<Claim> claims = algo.Claims;
-                //    string rol = algo.FindFirst("rol").Value;
-                //    Debug.WriteLine("el rol es: " + rol);
-                //}
-                
-                var currentUser = context.User;
-                if (currentUser.HasClaim(c => c.Type == JwtRegisteredClaimNames.NameId))
-                    Debug.WriteLine("ohh yeah");
-                else
-                    Debug.WriteLine("ohh noooo");
+                string accesToken = string.Empty;
+                accesToken = context.Request.Headers["Authorization"];
 
+                string token = "";
 
+                if(accesToken != string.Empty && accesToken != null)
+                {
+                    token = accesToken.Split(" ")[1];
+                    TokenValidationParameters validationParameters = new TokenValidationParameters();
+                    SecurityToken validatedToken;
+                    validationParameters.ValidateIssuer = true;
+                    validationParameters.ValidateAudience = true;
+                    validationParameters.ValidateLifetime = true;
+                    validationParameters.ValidateIssuerSigningKey = true;
+                    validationParameters.ValidIssuer = configuration["Jwt:Issuer"];
+                    validationParameters.ValidAudience = configuration["Jwt:Issuer"];
+                    validationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+                    ClaimsPrincipal principal = new JwtSecurityTokenHandler().ValidateToken(token, validationParameters, out validatedToken);
+                    var usuario = principal.Claims.SingleOrDefault(c => c.Type == "usuario").Value;
+                    var expira = principal.Claims.SingleOrDefault(c => c.Type == "expira").Value;
+                    Debug.Write(usuario.ToString());
+                    Debug.Write(expira.ToString());
+                }
                 await _next.Invoke(context);
             }
 
             catch
             {
-
+                context.Response.StatusCode = 401;
+                //throw;
             }
         }
     }
